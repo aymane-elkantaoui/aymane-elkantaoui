@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gamma Knife – Radiosurgery Presentation</title>
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0e1a;
+      --surface:   #111827;
+      --accent:    #6366f1;
+      --accent2:   #22d3ee;
+      --text:      #e2e8f0;
+      --muted:     #94a3b8;
+      --radius:    16px;
+      --slide-w:   960px;
+      --slide-h:   540px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px 16px 80px;
+      gap: 16px;
+    }
+
+    h1.deck-title {
+      font-size: 1.1rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+
+    /* ── Slide Wrapper ────────────────────────────────────────────── */
+    .deck {
+      position: relative;
+      width: 100%;
+      max-width: var(--slide-w);
+    }
+
+    .slide {
+      display: none;
+      background: var(--surface);
+      border-radius: var(--radius);
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      padding: clamp(24px, 4vw, 56px);
+      box-shadow: 0 8px 48px rgba(0,0,0,.6);
+      position: relative;
+      overflow: hidden;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .slide.active { display: flex; }
+
+    /* decorative gradient blob */
+    .slide::before {
+      content: '';
+      position: absolute;
+      inset: -60px;
+      background: radial-gradient(ellipse at 80% 20%, rgba(99,102,241,.18) 0%, transparent 60%),
+                  radial-gradient(ellipse at 10% 80%, rgba(34,211,238,.12) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    /* slide number badge */
+    .slide-num {
+      position: absolute;
+      bottom: 18px;
+      right: 24px;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* ── Typography ───────────────────────────────────────────────── */
+    .slide-tag {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent2);
+      margin-bottom: 10px;
+    }
+
+    .slide h2 {
+      font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+      font-weight: 700;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #fff 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 18px;
+    }
+
+    .slide p, .slide li {
+      font-size: clamp(0.85rem, 1.8vw, 1.05rem);
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .slide ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 0;
+    }
+
+    .slide ul li::before {
+      content: '▸ ';
+      color: var(--accent);
+    }
+
+    .slide strong { color: var(--text); }
+
+    /* ── Hero Slide ───────────────────────────────────────────────── */
+    .hero h2 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+    }
+    .hero .subtitle {
+      font-size: clamp(0.9rem, 2vw, 1.2rem);
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    /* ── Two-column layout ────────────────────────────────────────── */
+    .cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    /* ── Stat Cards ───────────────────────────────────────────────── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-card .value {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-card .label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── Timeline ─────────────────────────────────────────────────── */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tl-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .tl-year {
+      min-width: 48px;
+      font-weight: 700;
+      color: var(--accent2);
+      font-size: 0.9rem;
+      padding-top: 2px;
+    }
+
+    .tl-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .tl-text { font-size: 0.88rem; color: var(--muted); line-height: 1.4; }
+
+    /* ── Step cards (how it works) ────────────────────────────────── */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .step {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(99,102,241,.25);
+      border-radius: 12px;
+      padding: 14px 12px;
+      text-align: center;
+    }
+
+    .step .icon { font-size: 1.6rem; margin-bottom: 8px; }
+    .step .step-title { font-size: 0.8rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .step .step-desc  { font-size: 0.72rem; color: var(--muted); line-height: 1.35; }
+
+    /* ── Indications grid ─────────────────────────────────────────── */
+    .indications {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .ind-card {
+      background: rgba(255,255,255,.04);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .ind-card strong { display: block; color: var(--text); margin-bottom: 2px; }
+
+    /* ── Comparison table ─────────────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: clamp(0.72rem, 1.5vw, 0.88rem);
+      margin-top: 8px;
+    }
+
+    th {
+      background: rgba(99,102,241,.2);
+      color: var(--accent2);
+      padding: 8px 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 7px 12px;
+      color: var(--muted);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    tr:last-child td { border-bottom: none; }
+    td:first-child { color: var(--text); font-weight: 500; }
+
+    .check { color: #4ade80; }
+    .cross  { color: #f87171; }
+
+    /* ── CTA / last slide ─────────────────────────────────────────── */
+    .cta-box {
+      background: linear-gradient(135deg, rgba(99,102,241,.15) 0%, rgba(34,211,238,.10) 100%);
+      border: 1px solid rgba(99,102,241,.3);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin-top: 16px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── Navigation ───────────────────────────────────────────────── */
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .nav button {
+      background: rgba(99,102,241,.15);
+      color: var(--text);
+      border: 1px solid rgba(99,102,241,.35);
+      border-radius: 8px;
+      padding: 10px 24px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .nav button:hover:not(:disabled) { background: rgba(99,102,241,.35); }
+    .nav button:disabled { opacity: 0.3; cursor: default; }
+
+    .nav .progress-text { color: var(--muted); font-size: 0.85rem; min-width: 80px; text-align: center; }
+
+    /* progress bar */
+    .progress-bar {
+      width: 100%;
+      max-width: var(--slide-w);
+      height: 3px;
+      background: rgba(255,255,255,.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 999px;
+      transition: width .3s ease;
+    }
+  </style>
+</head>
+<body>
+
+<h1 class="deck-title">Gamma Knife Radiosurgery</h1>
+
+<!-- ─────────────────────── SLIDE 1 – HERO ─────────────────────── -->
+<div class="deck">
+
+  <div class="slide active hero" id="slide-1">
+    <div class="slide-tag">Medical Technology</div>
+    <h2>Gamma Knife®<br>Radiosurgery</h2>
+    <p class="subtitle">Precision stereotactic radiation therapy for the brain —<br>
+      <strong>no scalpel, no incision, no craniotomy.</strong>
+    </p>
+    <div class="stats" style="margin-top: 28px;">
+      <div class="stat-card">
+        <div class="value">1.2M+</div>
+        <div class="label">Patients treated worldwide</div>
+      </div>
+      <div class="stat-card">
+        <div class="value">0.1 mm</div>
+        <div class="label">Targeting precision</div>
+      </div>
+      <div class="stat-card">
+        <div class="value">192</div>
+        <div class="label">Cobalt-60 beam sources</div>
+      </div>
+    </div>
+    <div class="slide-num">1 / 8</div>
+  </div>
+
+  <!-- ─────────────────── SLIDE 2 – WHAT IS IT ──────────────────── -->
+  <div class="slide" id="slide-2">
+    <div class="slide-tag">Definition</div>
+    <h2>What Is the Gamma Knife?</h2>
+    <div class="cols">
+      <ul>
+        <li>A <strong>non-invasive neurosurgical device</strong> that delivers highly focused beams of gamma radiation to intracranial targets.</li>
+        <li>Despite the name, <strong>no knife or blade is used</strong> — the term refers to the knife-like precision of the radiation.</li>
+        <li>Manufactured by <strong>Elekta AB</strong> (Sweden), sold under the brand Leksell Gamma Knife®.</li>
+        <li>Gamma radiation comes from <strong>Cobalt-60 (⁶⁰Co)</strong> sources arranged in a helmet.</li>
+        <li>Each beam carries a <strong>sub-therapeutic dose</strong>; only at the convergence point does the cumulative dose become therapeutic.</li>
+      </ul>
+      <div>
+        <p style="font-size:0.8rem; color:var(--muted); background:rgba(255,255,255,.04); border-radius:10px; padding:14px; line-height:1.6;">
+          <strong style="color:var(--accent2)">Key principle:</strong><br>
+          Multiple low-dose beams intersect at a single focal point inside the brain, delivering a high, precise dose to the target while sparing surrounding healthy tissue.
+        </p>
+        <br>
+        <p style="font-size:0.8rem; color:var(--muted); background:rgba(255,255,255,.04); border-radius:10px; padding:14px; line-height:1.6;">
+          <strong style="color:var(--accent2)">Positioning:</strong><br>
+          The patient's head is immobilized in a stereotactic frame. MRI/CT images are fused to millimeter-accurate coordinates to plan the dose.
+        </p>
+      </div>
+    </div>
+    <div class="slide-num">2 / 8</div>
+  </div>
+
+  <!-- ─────────────────── SLIDE 3 – HISTORY ─────────────────────── -->
+  <div class="slide" id="slide-3">
+    <div class="slide-tag">History</div>
+    <h2>A Brief History</h2>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-year">1951</div>
+        <div class="tl-dot"></div>
+        <div class="tl-text">Swedish neurosurgeon <strong>Lars Leksell</strong> introduces the concept of <em>stereotactic radiosurgery</em> (SRS).</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">1968</div>
+        <div class="tl-dot"></div>
+        <div class="tl-text">First clinical Gamma Knife unit installed at the Karolinska Institute, Stockholm, Sweden.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">1987</div>
+        <div class="tl-dot"></div>
+        <div class="tl-text">First unit outside Scandinavia installed at the University of Pittsburgh (USA), opening the technology to wider clinical use.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">1990s</div>
+        <div class="tl-dot"></div>
+        <div class="tl-text">Rapid international expansion; indications broaden beyond AVMs to brain metastases, acoustic neuromas, and trigeminal neuralgia.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">2009</div>
+        <div class="tl-dot"></div>
+        <div class="tl-text">Leksell Gamma Knife® <em>Perfexion</em> launched — robotic patient positioning, fully automatic helmet collimation.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">2015–</div>
+        <div class="tl-dot"></div>
+        <div class="tl-text">Gamma Knife® <em>Icon</em> introduced: frameless mask option, on-board CBCT imaging, real-time motion management.</div>
+      </div>
+    </div>
+    <div class="slide-num">3 / 8</div>
+  </div>
+
+  <!-- ─────────────────── SLIDE 4 – HOW IT WORKS ────────────────── -->
+  <div class="slide" id="slide-4">
+    <div class="slide-tag">Technology</div>
+    <h2>How It Works — Step by Step</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="icon">🧠</div>
+        <div class="step-title">1 · Imaging</div>
+        <div class="step-desc">High-resolution MRI, CT, or angiography identifies the target lesion with sub-millimeter accuracy.</div>
+      </div>
+      <div class="step">
+        <div class="icon">📐</div>
+        <div class="step-title">2 · Dose Planning</div>
+        <div class="step-desc">Treatment planning software (Leksell GammaPlan®) models beam angles, collimator sizes, and dose distribution.</div>
+      </div>
+      <div class="step">
+        <div class="icon">🔒</div>
+        <div class="step-title">3 · Fixation</div>
+        <div class="step-desc">A stereotactic frame or thermoplastic mask immobilizes the head, establishing a coordinate system.</div>
+      </div>
+      <div class="step">
+        <div class="icon">☢️</div>
+        <div class="step-title">4 · Irradiation</div>
+        <div class="step-desc">Up to 192 Co-60 beams simultaneously converge at the isocenter. Session typically lasts 15–60 minutes.</div>
+      </div>
+    </div>
+    <p style="margin-top:20px; font-size:0.83rem;">
+      The radiation dose at the focus is <strong>typically 12–25 Gy</strong> in a single fraction,
+      causing DNA double-strand breaks in the target cells while sparing adjacent healthy structures.
+    </p>
+    <div class="slide-num">4 / 8</div>
+  </div>
+
+  <!-- ───────────────── SLIDE 5 – INDICATIONS ───────────────────── -->
+  <div class="slide" id="slide-5">
+    <div class="slide-tag">Clinical Applications</div>
+    <h2>What Can It Treat?</h2>
+    <div class="indications">
+      <div class="ind-card">
+        <strong>Brain Metastases</strong>
+        Most common indication; targets secondary tumors from lung, breast, melanoma, etc.
+      </div>
+      <div class="ind-card">
+        <strong>Arteriovenous Malformations (AVMs)</strong>
+        Radiation causes progressive obliteration of the AVM nidus over 2–3 years.
+      </div>
+      <div class="ind-card">
+        <strong>Acoustic Neuroma (Vestibular Schwannoma)</strong>
+        High local control rates (≥95 % at 5 years) with hearing preservation.
+      </div>
+      <div class="ind-card">
+        <strong>Trigeminal Neuralgia</strong>
+        Targets the trigeminal nerve root; pain relief in ~80 % of patients.
+      </div>
+      <div class="ind-card">
+        <strong>Meningioma</strong>
+        Effective for small to medium skull-base or recurrent meningiomas.
+      </div>
+      <div class="ind-card">
+        <strong>Pituitary Adenoma</strong>
+        Controls hormone-secreting or non-secreting adenomas not amenable to surgery.
+      </div>
+      <div class="ind-card">
+        <strong>Glioma (selected)</strong>
+        Boost or recurrent high-grade glioma in selected cases.
+      </div>
+      <div class="ind-card">
+        <strong>Functional Disorders</strong>
+        Obsessive-compulsive disorder, epilepsy (selected cases) via precise lesioning.
+      </div>
+    </div>
+    <div class="slide-num">5 / 8</div>
+  </div>
+
+  <!-- ─────────────────── SLIDE 6 – ADVANTAGES ─────────────────────── -->
+  <div class="slide" id="slide-6">
+    <div class="slide-tag">Advantages &amp; Limitations</div>
+    <h2>Gamma Knife vs. Open Surgery</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Gamma Knife SRS</th>
+          <th>Open Neurosurgery</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Anesthesia required</td>
+          <td><span class="cross">✗</span> Local / none</td>
+          <td><span class="check">✓</span> General</td>
+        </tr>
+        <tr>
+          <td>Hospital stay</td>
+          <td><span class="check">✓</span> Outpatient (same day)</td>
+          <td><span class="cross">✗</span> Several days</td>
+        </tr>
+        <tr>
+          <td>Infection risk</td>
+          <td><span class="check">✓</span> Minimal</td>
+          <td><span class="cross">✗</span> Present</td>
+        </tr>
+        <tr>
+          <td>Recovery time</td>
+          <td><span class="check">✓</span> Days</td>
+          <td><span class="cross">✗</span> Weeks–months</td>
+        </tr>
+        <tr>
+          <td>Skull-base accessibility</td>
+          <td><span class="check">✓</span> Excellent</td>
+          <td><span class="cross">✗</span> Difficult</td>
+        </tr>
+        <tr>
+          <td>Tissue sample / biopsy</td>
+          <td><span class="cross">✗</span> Not possible</td>
+          <td><span class="check">✓</span> Possible</td>
+        </tr>
+        <tr>
+          <td>Large tumor (&gt;3 cm)</td>
+          <td><span class="cross">✗</span> Less suitable</td>
+          <td><span class="check">✓</span> Preferred</td>
+        </tr>
+        <tr>
+          <td>Repeat treatment</td>
+          <td><span class="check">✓</span> Feasible</td>
+          <td><span class="cross">✗</span> Higher risk</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="slide-num">6 / 8</div>
+  </div>
+
+  <!-- ─────────────────── SLIDE 7 – OUTCOMES ─────────────────────── -->
+  <div class="slide" id="slide-7">
+    <div class="slide-tag">Clinical Outcomes</div>
+    <h2>Evidence &amp; Outcomes</h2>
+    <div class="cols">
+      <ul>
+        <li><strong>Brain metastases:</strong> local control ~85–95 % at 1 year (JAMA Oncol., 2017).</li>
+        <li><strong>Acoustic neuroma:</strong> tumor control ~95 % at 10 years with a hearing preservation rate of 50–60 %.</li>
+        <li><strong>Trigeminal neuralgia:</strong> initial pain relief ~80–90 %; recurrence ~30 % at 3 years.</li>
+        <li><strong>AVM obliteration:</strong> 80 % obliteration for AVMs &lt;3 cm at 3 years post-treatment.</li>
+        <li><strong>Meningioma:</strong> 5-year local control &gt;95 % for grade I tumors.</li>
+      </ul>
+      <div>
+        <p style="font-size:0.82rem; color:var(--muted); background:rgba(255,255,255,.04); border-radius:10px; padding:14px; line-height:1.7;">
+          <strong style="color:var(--accent2)">Side Effects</strong><br>
+          • <em>Acute:</em> headache, nausea, fatigue (usually mild &amp; transient).<br>
+          • <em>Subacute:</em> radiation edema (~10–15 %), managed with corticosteroids.<br>
+          • <em>Late:</em> radiation necrosis (&lt;5 %), cranial nerve deficits (rare).<br>
+          • Overall complication rate significantly lower than open surgery.
+        </p>
+      </div>
+    </div>
+    <div class="slide-num">7 / 8</div>
+  </div>
+
+  <!-- ─────────────────── SLIDE 8 – CONCLUSION ─────────────────────── -->
+  <div class="slide" id="slide-8">
+    <div class="slide-tag">Conclusion</div>
+    <h2>Key Takeaways</h2>
+    <ul>
+      <li>The Gamma Knife is the <strong>gold standard</strong> for stereotactic radiosurgery of intracranial lesions ≤3 cm.</li>
+      <li>It achieves <strong>surgical-level precision</strong> without opening the skull, dramatically reducing morbidity and recovery time.</li>
+      <li>Over <strong>1.2 million patients</strong> have been treated since 1968, with a strong long-term evidence base.</li>
+      <li>The technology continues to evolve — frameless fixation, online image guidance, and AI-assisted planning are the frontier.</li>
+    </ul>
+    <div class="cta-box">
+      <strong style="color:var(--accent2)">Selected References</strong><br>
+      • Leksell L. (1951). "The stereotaxic method and radiosurgery of the brain." <em>Acta Chir Scand.</em><br>
+      • Pollock BE et al. (2017). "Gamma Knife radiosurgery for brain metastases." <em>JAMA Oncol.</em><br>
+      • Roos DE et al. "Gamma Knife Radiosurgery — A multidisciplinary consensus." <em>J Med Imaging Radiat Oncol.</em><br>
+      • Elekta AB. (2024). <em>Leksell Gamma Knife® Icon clinical overview.</em>
+    </div>
+    <div class="slide-num">8 / 8</div>
+  </div>
+
+</div><!-- /.deck -->
+
+<!-- progress bar -->
+<div class="progress-bar">
+  <div class="progress-fill" id="progressFill" style="width:12.5%"></div>
+</div>
+
+<!-- navigation -->
+<div class="nav">
+  <button id="prevBtn" onclick="changeSlide(-1)" disabled>← Prev</button>
+  <span class="progress-text" id="progressText">1 / 8</span>
+  <button id="nextBtn" onclick="changeSlide(1)">Next →</button>
+</div>
+
+<script>
+  const TOTAL = 8;
+  let current = 1;
+
+  function changeSlide(dir) {
+    document.getElementById('slide-' + current).classList.remove('active');
+    current = Math.max(1, Math.min(TOTAL, current + dir));
+    document.getElementById('slide-' + current).classList.add('active');
+    document.getElementById('progressText').textContent = current + ' / ' + TOTAL;
+    document.getElementById('progressFill').style.width = (current / TOTAL * 100) + '%';
+    document.getElementById('prevBtn').disabled = current === 1;
+    document.getElementById('nextBtn').disabled = current === TOTAL;
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   changeSlide(-1);
+  });
+</script>
+</body>
+</html>
